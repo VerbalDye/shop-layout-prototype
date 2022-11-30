@@ -22,17 +22,10 @@ var updateCoordinates = function ({ target }, ui) {
     target.innerHTML = "(" + adjustCooridinate(target.offsetLeft, "x") + ", " + adjustCooridinate(target.offsetTop, "y") + ")";
 }
 
-// const rows = [
-//     ["name1", "city1", "some other info"],
-//     ["name2", "city2", "more info"]
-// ];
-
 var downloadCSV = function () {
     let rows = [["name", "x", "y"]]
 
     var children = shopLayoutEl.children;
-
-    console.log(children);
 
     Array.from(children).forEach(function (child) {
         let row = []
