@@ -1,10 +1,11 @@
 var shopLayoutEl = document.querySelector("#shop-layout-ui");
 var saveBtn = document.querySelector("#save");
+var addBtn = document.querySelector("#add-element")
 var csvBtn = document.querySelector("#download-csv");
 var widthInputEl = document.querySelector("#width");
 var heightInputEl = document.querySelector("#height");
 
-var moving = false
+var objectIndex = 1;
 
 shopLayoutEl.style.width = "500px";
 shopLayoutEl.style.height = "500px";
@@ -17,7 +18,7 @@ var adjustCooridinate = function (value, axis) {
     }
 }
 
-var updateCoordinates = function ({target}, ui) {
+var updateCoordinates = function ({ target }, ui) {
     target.innerHTML = "(" + adjustCooridinate(target.offsetLeft, "x") + ", " + adjustCooridinate(target.offsetTop, "y") + ")";
 }
 
@@ -27,13 +28,13 @@ var updateCoordinates = function ({target}, ui) {
 // ];
 
 var downloadCSV = function () {
-    let rows = [["name","x","y"]]
+    let rows = [["name", "x", "y"]]
 
     var children = shopLayoutEl.children;
 
     console.log(children);
 
-    Array.from(children).forEach(function(child) {
+    Array.from(children).forEach(function (child) {
         let row = []
         row.push(child.id)
         row.push(adjustCooridinate(child.offsetLeft, "x"))
@@ -52,19 +53,15 @@ var downloadCSV = function () {
     window.open(encodedUri);
 }
 
-shopObjectEl = document.createElement("div");
-shopObjectEl.className = "shop-element";
-shopObjectEl.id = "shop-element";
-shopLayoutEl.appendChild(shopObjectEl);
-shopObjectEl.style.left = "253px"
-updateCoordinates({ target: shopObjectEl }, {})
-$("#shop-element").draggable({ containment: "parent", snap: true, cursor: "crosshair", cursorAt: { top: 0, left: 0 }, drag: updateCoordinates, stop: updateCoordinates });
-
-shopObjectEl2 = document.createElement("div");
-shopObjectEl2.className = "shop-element";
-shopObjectEl2.id = "shop-element2";
-shopLayoutEl.appendChild(shopObjectEl2);
-$("#shop-element2").draggable({ containment: "parent", snap: true, cursor: "crosshair", cursorAt: { top: 0, left: 0 }, drag: updateCoordinates, stop: updateCoordinates });
+var createObject = function () {
+    var shopObjectEl = document.createElement("div");
+    shopObjectEl.className = "shop-element";
+    shopObjectEl.id = "shop-element" + objectIndex;
+    shopLayoutEl.appendChild(shopObjectEl);
+    updateCoordinates({ target: shopObjectEl }, {})
+    $("#shop-element" + objectIndex).draggable({ containment: "parent", snap: true, cursor: "crosshair", cursorAt: { top: 0, left: 0 }, drag: updateCoordinates, stop: updateCoordinates });
+    objectIndex += 1;
+}
 
 var handleSave = function (event) {
     shopLayoutEl.style.width = widthInputEl.value + "px"
@@ -72,4 +69,5 @@ var handleSave = function (event) {
 }
 
 saveBtn.addEventListener('click', handleSave);
+addBtn.addEventListener('click', createObject)
 csvBtn.addEventListener('click', downloadCSV);
