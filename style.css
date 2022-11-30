@@ -1,0 +1,15 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+#shop-layout-ui {
+    border: 3px black solid;
+}
+
+.shop-element{
+    position: absolute;
+    background-color: blue;
+    height: 50px;
+    width: 50px;
+}
