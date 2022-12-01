@@ -8,12 +8,15 @@ var csvBtn = document.querySelector("#download-csv");
 var csvUploadBtn = document.querySelector("#upload-csv");
 var createObjectAddBtn = document.querySelector("#create-object-add");
 var createObjectCancelBtn = document.querySelector("#create-object-cancel");
+var uploadCSVConfirmBtn = document.querySelector("#upload-csv-confirm");
+var uploadCSVCancelBtn = document.querySelector("#upload-csv-cancel");
 
 // Inputs
 var widthInputEl = document.querySelector("#width");
 var heightInputEl = document.querySelector("#height");
 var objectHeightInputEl = document.querySelector("#object-height");
 var objectWidthInputEl = document.querySelector("#object-width");
+var csvUploadInputEl = document.querySelector("#csv-input");
 
 // Modals
 var objectModalEl = document.querySelector("#create-object-modal");
@@ -69,9 +72,8 @@ var downloadCSV = function () {
     window.open(encodedUri);
 }
 
-var uploadCSV = function (input) {
-    let file = input.files[0];
-
+var uploadCSV = function (file) {
+    
     let reader = new FileReader();
     alert(file.name);
     if (file.name.split(".")[1] == "csv") {
@@ -112,6 +114,17 @@ var uploadCSV = function (input) {
         }
     } else {
         console.log("Filetype Error");
+    }
+}
+
+var handleUploadCSV = function () {
+    let file = csvUploadInputEl.files[0];
+
+    if (file && file.name.split(".")[1] == "csv") {
+    uploadCSV(file);
+    closeCSVModal();
+    } else {
+        alert ("Please upload a CSV file.")
     }
 }
 
@@ -168,3 +181,5 @@ csvBtn.addEventListener('click', downloadCSV);
 createObjectAddBtn.addEventListener('click', handleCreateObject);
 createObjectCancelBtn.addEventListener('click', closeObjectModal);
 csvUploadBtn.addEventListener('click', openCSVModal);
+uploadCSVConfirmBtn.addEventListener('click', handleUploadCSV);
+uploadCSVCancelBtn.addEventListener('click', closeCSVModal);
