@@ -16,6 +16,7 @@ var widthInputEl = document.querySelector("#width");
 var heightInputEl = document.querySelector("#height");
 var objectHeightInputEl = document.querySelector("#object-height");
 var objectWidthInputEl = document.querySelector("#object-width");
+var objectColorInputEl = document.querySelector("#object-color");
 var csvUploadInputEl = document.querySelector("#csv-input");
 
 // Modals
@@ -34,7 +35,6 @@ var adjustCooridinate = function (value, axis, reverse) {
         }
     } else {
         if (axis == "x") {
-            console.log(shopLayoutEl.offsetTop)
             return value + parseInt(shopLayoutEl.offsetLeft) + 3
         } else if (axis == "y") {
             return value + parseInt(shopLayoutEl.offsetTop) + 3
@@ -42,12 +42,17 @@ var adjustCooridinate = function (value, axis, reverse) {
     }
 }
 
+var rgbToHex = (r, g, b) => [r, g, b].map(x => {
+    const hex = x.toString(16)
+    return hex.length === 1 ? '0' + hex : hex
+}).join('')
+
 var updateCoordinates = function ({ target }, ui) {
     target.innerHTML = "(" + adjustCooridinate(target.offsetLeft, "x") + ", " + adjustCooridinate(target.offsetTop, "y") + ")";
 }
 
 var downloadCSV = function () {
-    let rows = [["name", "x", "y", "width", "height"], ["window", "0", "0", shopLayoutEl.style.width.split("px")[0], shopLayoutEl.style.height.split("px")[0]]]
+    let rows = [["name", "x", "y", "width", "height", "color"], ["window", "0", "0", shopLayoutEl.style.width.split("px")[0], shopLayoutEl.style.height.split("px")[0], "000000"]]
 
     var children = shopLayoutEl.children;
 
@@ -58,6 +63,9 @@ var downloadCSV = function () {
         row.push(adjustCooridinate(child.offsetTop, "y"))
         row.push(child.style.width.split("px")[0])
         row.push(child.style.height.split("px")[0])
+        var colors = child.style.background.split("(")[1].split(")")[0].split(", ")
+        var hex = rgbToHex(parseInt(colors[0]), parseInt(colors[1]), parseInt(colors[2]))
+        row.push(hex);
         rows.push(row);
     })
 
@@ -73,14 +81,13 @@ var downloadCSV = function () {
 }
 
 var uploadCSV = function (file) {
-    
+
     let reader = new FileReader();
-    
+
     if (file.name.split(".")[1] == "csv") {
         reader.readAsText(file);
         reader.onload = function () {
             var csv = reader.result
-            console.log(csv)
             var rows = csv.split("\r\n");
             rows.pop();
             var result = [];
@@ -91,7 +98,7 @@ var uploadCSV = function (file) {
                 if (index > 1) {
                     let obj = {}
                     let rowArray = row.split(",");
-                    for (var i = 1; i <= 4; i++) {
+                    for (var i = 1; i <= 5; i++) {
                         switch (i) {
                             case 1: obj.x = parseInt(rowArray[i]);
                                 break;
@@ -100,6 +107,8 @@ var uploadCSV = function (file) {
                             case 3: obj.width = parseInt(rowArray[i]);
                                 break;
                             case 4: obj.height = parseInt(rowArray[i]);
+                                break;
+                            case 5: obj.color = "#" + rowArray[i];
                                 break;
                             default:
                         }
@@ -124,10 +133,10 @@ var handleUploadCSV = function () {
     let file = csvUploadInputEl.files[0];
 
     if (file && file.name.split(".")[1] == "csv") {
-    uploadCSV(file);
-    closeCSVModal();
+        uploadCSV(file);
+        closeCSVModal();
     } else {
-        alert ("Please upload a CSV file.")
+        alert("Please upload a CSV file.")
     }
 }
 
@@ -152,10 +161,10 @@ var createObject = function (params) {
     shopObjectEl.className = "shop-element";
     shopObjectEl.id = "shop-element" + objectIndex;
     shopObjectEl.style.left = adjustCooridinate(params.x, "x", true) + "px";
-    console.log(shopObjectEl.style.left)
     shopObjectEl.style.top = adjustCooridinate(params.y, "y", true) + "px";
     shopObjectEl.style.height = params.height + "px";
     shopObjectEl.style.width = params.width + "px";
+    shopObjectEl.style.background = params.color
     shopLayoutEl.appendChild(shopObjectEl);
 
     updateCoordinates({ target: shopObjectEl }, {})
@@ -165,7 +174,7 @@ var createObject = function (params) {
 }
 
 var handleCreateObject = function () {
-    var params = { x: 0, y: 0, width: objectWidthInputEl.value, height: objectHeightInputEl.value }
+    var params = { x: 0, y: 0, width: objectWidthInputEl.value, height: objectHeightInputEl.value, color: objectColorInputEl.value }
     createObject(params);
 }
 
