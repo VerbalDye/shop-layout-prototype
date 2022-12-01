@@ -26,6 +26,7 @@
         <button id="save" class="btn">Save</button>
         <button id="add-element" class="btn">Add Object</button>
         <button id="download-csv" class="btn">Download CSV</button>
+        <button id="upload-csv" class="btn">Upload CSV</button>
     </div>
     <div id="shop-layout-ui">
     </div>
@@ -38,6 +39,12 @@
         <input id="object-height" name="object-height" type="number" value="50"/>
         <button class="btn" id="create-object-add">Add</button>
         <button class="btn" id="create-object-cancel">Cancel</button>
+    </div>
+
+    <div class="modal" id="upload-csv-modal">
+        <h2>Upload CSV</h2>
+        <label for="csv-input">Upload CSV</label>
+        <input type="file" name="csv-input" id="csv-input"/>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"

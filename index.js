@@ -2,9 +2,11 @@ var shopLayoutEl = document.querySelector("#shop-layout-ui");
 var saveBtn = document.querySelector("#save");
 var addBtn = document.querySelector("#add-element")
 var csvBtn = document.querySelector("#download-csv");
+var csvUploadBtn = document.querySelector("#upload-csv");
 var widthInputEl = document.querySelector("#width");
 var heightInputEl = document.querySelector("#height");
 var objectModalEl = document.querySelector("#create-object-modal");
+var csvModalEl = document.querySelector("#upload-csv-modal");
 var createObjectAddBtn = document.querySelector("#create-object-add");
 var createObjectCancelBtn = document.querySelector("#create-object-cancel");
 var objectHeightInputEl = document.querySelector("#object-height");
@@ -27,7 +29,7 @@ var updateCoordinates = function ({ target }, ui) {
 }
 
 var downloadCSV = function () {
-    let rows = [["name", "x", "y"]]
+    let rows = [["name", "x", "y", "width", "height"]]
 
     var children = shopLayoutEl.children;
 
@@ -36,6 +38,8 @@ var downloadCSV = function () {
         row.push(child.id)
         row.push(adjustCooridinate(child.offsetLeft, "x"))
         row.push(adjustCooridinate(child.offsetTop, "y"))
+        row.push(child.style.height.split("px")[0])
+        row.push(child.style.width.split("px")[0])
         rows.push(row);
     })
 
@@ -50,12 +54,24 @@ var downloadCSV = function () {
     window.open(encodedUri);
 }
 
-var openObjectModel = function () {
+var uploadCSV = function () {
+
+}
+
+var openObjectModal = function () {
     objectModalEl.style.display = "block";
 }
 
-var closeObjectModel = function () {
+var closeObjectModal = function () {
     objectModalEl.style.display = "none";
+}
+
+var openCSVModal = function () {
+    csvModalEl.style.display = "block";
+}
+
+var closeCSVModal = function () {
+    csvModalEl.style.display = "none";
 }
 
 var createObject = function () {
@@ -69,7 +85,7 @@ var createObject = function () {
     updateCoordinates({ target: shopObjectEl }, {})
     $("#shop-element" + objectIndex).draggable({ containment: "parent", snap: true, cursor: "crosshair", cursorAt: { top: 0, left: 0 }, drag: updateCoordinates, stop: updateCoordinates });
     objectIndex += 1;
-    closeObjectModel();
+    closeObjectModal();
 }
 
 var handleSave = function (event) {
@@ -82,7 +98,8 @@ var handleSave = function (event) {
 handleSave();
 
 saveBtn.addEventListener('click', handleSave);
-addBtn.addEventListener('click', openObjectModel)
+addBtn.addEventListener('click', openObjectModal)
 csvBtn.addEventListener('click', downloadCSV);
-createObjectAddBtn.addEventListener('click', createObject)
-createObjectCancelBtn.addEventListener('click', closeObjectModel)
+createObjectAddBtn.addEventListener('click', createObject);
+createObjectCancelBtn.addEventListener('click', closeObjectModal);
+csvUploadBtn.addEventListener('click', openCSVModal);
