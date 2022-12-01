@@ -47,7 +47,7 @@ var updateCoordinates = function ({ target }, ui) {
 }
 
 var downloadCSV = function () {
-    let rows = [["name", "x", "y", "width", "height"]]
+    let rows = [["name", "x", "y", "width", "height"], ["window", "0", "0", shopLayoutEl.style.width.split("px")[0], shopLayoutEl.style.height.split("px")[0]]]
 
     var children = shopLayoutEl.children;
 
@@ -75,7 +75,7 @@ var downloadCSV = function () {
 var uploadCSV = function (file) {
     
     let reader = new FileReader();
-    alert(file.name);
+    
     if (file.name.split(".")[1] == "csv") {
         reader.readAsText(file);
         reader.onload = function () {
@@ -84,8 +84,11 @@ var uploadCSV = function (file) {
             var rows = csv.split("\r\n");
             rows.pop();
             var result = [];
+            widthInputEl.value = parseInt(rows[1].split(",")[3])
+            heightInputEl.value = parseInt(rows[1].split(",")[4])
+            handleSave();
             rows.forEach(function (row, index) {
-                if (index !== 0) {
+                if (index > 1) {
                     let obj = {}
                     let rowArray = row.split(",");
                     for (var i = 1; i <= 4; i++) {
