@@ -17,11 +17,11 @@
     <div id="toolbar">
         <div>
             <label for="width">Width</label>
-            <input id="width" name="width" type="number">
+            <input id="width" name="width" type="number" value="500">
         </div>
         <div>
             <label for="height">Height</label>
-            <input name="height" id="height" type="number">
+            <input name="height" id="height" type="number" value="500">
         </div>
         <button id="save" class="btn">Save</button>
         <button id="add-element" class="btn">Add Object</button>
@@ -29,6 +29,17 @@
     </div>
     <div id="shop-layout-ui">
     </div>
+
+    <div class="modal" id="create-object-modal">
+        <h2>Add Object</h2>
+        <label for="object-width">Width:</label>
+        <input id="object-width" name="object-width" type="number" value="50"/>
+        <label for="object-height">Height:</label>
+        <input id="object-height" name="object-height" type="number" value="50"/>
+        <button class="btn" id="create-object-add">Add</button>
+        <button class="btn" id="create-object-cancel">Cancel</button>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"
         integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"

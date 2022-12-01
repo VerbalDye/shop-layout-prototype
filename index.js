@@ -4,11 +4,15 @@ var addBtn = document.querySelector("#add-element")
 var csvBtn = document.querySelector("#download-csv");
 var widthInputEl = document.querySelector("#width");
 var heightInputEl = document.querySelector("#height");
+var objectModalEl = document.querySelector("#create-object-modal");
+var createObjectAddBtn = document.querySelector("#create-object-add");
+var createObjectCancelBtn = document.querySelector("#create-object-cancel");
+var objectHeightInputEl = document.querySelector("#object-height");
+var objectWidthInputEl = document.querySelector("#object-width");
+
 
 var objectIndex = 1;
-
-shopLayoutEl.style.width = "500px";
-shopLayoutEl.style.height = "500px";
+var shopDim = {}
 
 var adjustCooridinate = function (value, axis) {
     if (axis == "x") {
@@ -46,21 +50,39 @@ var downloadCSV = function () {
     window.open(encodedUri);
 }
 
+var openObjectModel = function () {
+    objectModalEl.style.display = "block";
+}
+
+var closeObjectModel = function () {
+    objectModalEl.style.display = "none";
+}
+
 var createObject = function () {
     var shopObjectEl = document.createElement("div");
     shopObjectEl.className = "shop-element";
     shopObjectEl.id = "shop-element" + objectIndex;
+    shopObjectEl.style.height = objectHeightInputEl.value + "px";
+    shopObjectEl.style.width = objectWidthInputEl.value + "px";
     shopLayoutEl.appendChild(shopObjectEl);
+
     updateCoordinates({ target: shopObjectEl }, {})
     $("#shop-element" + objectIndex).draggable({ containment: "parent", snap: true, cursor: "crosshair", cursorAt: { top: 0, left: 0 }, drag: updateCoordinates, stop: updateCoordinates });
     objectIndex += 1;
+    closeObjectModel();
 }
 
 var handleSave = function (event) {
-    shopLayoutEl.style.width = widthInputEl.value + "px"
-    shopLayoutEl.style.height = heightInputEl.value + "px"
+    shopDim.width = widthInputEl.value + "px"
+    shopDim.height = heightInputEl.value + "px"
+    shopLayoutEl.style.width = shopDim.width;
+    shopLayoutEl.style.height = shopDim.height;
 }
 
+handleSave();
+
 saveBtn.addEventListener('click', handleSave);
-addBtn.addEventListener('click', createObject)
+addBtn.addEventListener('click', openObjectModel)
 csvBtn.addEventListener('click', downloadCSV);
+createObjectAddBtn.addEventListener('click', createObject)
+createObjectCancelBtn.addEventListener('click', closeObjectModel)
