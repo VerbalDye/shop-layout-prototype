@@ -1,6 +1,10 @@
 // Layout Element
 var shopLayoutEl = document.querySelector("#shop-layout-ui");
 
+//
+var windowHeight = window.innerHeight;
+var windowWidth = window.innerWidth;
+
 //Btns
 var saveBtn = document.querySelector("#save");
 var addBtn = document.querySelector("#add-element")
@@ -25,7 +29,11 @@ var csvModalEl = document.querySelector("#upload-csv-modal");
 
 // Global Variables
 var objectIndex = 1;
-var shopDim = {}
+var shopDim = {};
+var shopObject = {
+    window: {width: "", height: ""},
+    objects: []
+}
 
 // Function to translate absolute screen positiion to relative shop position
 // reverse is a boolean that converts relative values back to absolute
@@ -231,6 +239,16 @@ var handleSave = function (event) {
     shopLayoutEl.style.height = shopDim.height;
 }
 
+var getWindowDimensions = function () {
+    windowHeight = window.innerHeight;
+    windowWidth = window.innerWidth;
+}
+
+var drawLayout = function () {
+    
+}
+
+
 // Set the shiop size using default values
 handleSave();
 
@@ -243,3 +261,4 @@ createObjectCancelBtn.addEventListener('click', closeObjectModal);
 csvUploadBtn.addEventListener('click', openCSVModal);
 uploadCSVConfirmBtn.addEventListener('click', handleUploadCSV);
 uploadCSVCancelBtn.addEventListener('click', closeCSVModal);
+window.addEventListener('resize', getWindowDimensions);
