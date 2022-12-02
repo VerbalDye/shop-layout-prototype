@@ -1,0 +1,25 @@
+{
+    "objects": [
+        {
+            "name": "Station",
+            "width": "2",
+            "length": "2",
+            "x-offset": "1",
+            "y-offset": "1"
+        },
+        {
+            "name": "Source",
+            "width": "1",
+            "length": "2",
+            "x-offset": "0",
+            "y-offset": "1"
+        },
+        {
+            "name": "Drain",
+            "width": "1",
+            "length": "2",
+            "x-offset": "1",
+            "y-offset": "1"
+        }
+    ]
+}
