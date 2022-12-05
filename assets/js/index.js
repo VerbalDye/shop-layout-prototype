@@ -14,9 +14,7 @@ var uploadCSVCancelBtn = document.querySelector("#upload-csv-cancel");
 // Inputs
 var widthInputEl = document.querySelector("#width");
 var heightInputEl = document.querySelector("#height");
-var objectHeightInputEl = document.querySelector("#object-height");
-var objectWidthInputEl = document.querySelector("#object-width");
-var objectColorInputEl = document.querySelector("#object-color");
+var objectTypeSelectEl = document.querySelector("#object-type");
 var csvUploadInputEl = document.querySelector("#csv-input");
 
 // Modals
@@ -31,6 +29,32 @@ var shopObject = {
     objects: []
 }
 
+var objectTypes =
+    {
+        Station : {
+            width: 2,
+            length: 2,
+            xOffset: 1,
+            yOffset: 1,
+            color: "#035efc"
+        },
+        Source: {
+            width: 1,
+            length: 2,
+            xOffset: 0,
+            yOffset: 1,
+            color: "#fc3d03"
+        },
+        Drain: {
+            width: 1,
+            length: 2,
+            xOffset: 1,
+            yOffset: 1,
+            color: "#03fc13"
+        }
+    }
+
+
 var adjustCooridinate = function (value, axis, reverse) {
     var scaledValue;
     if (reverse) {
@@ -39,7 +63,7 @@ var adjustCooridinate = function (value, axis, reverse) {
         } else if (axis == "y") {
             scaledValue = value - parseInt(shopLayoutEl.offsetTop)
         }
-        return Math.round(scaledValue/10/scale);
+        return Math.round(scaledValue / scale) / 10;
     } else {
         scaledValue = value * 10 * scale
         if (axis == "x") {
@@ -50,19 +74,13 @@ var adjustCooridinate = function (value, axis, reverse) {
     }
 }
 
-// Universal function to keep colors in a standard format
-var rgbToHex = (r, g, b) => [r, g, b].map(x => {
-    const hex = x.toString(16)
-    return hex.length === 1 ? '0' + hex : hex
-}).join('')
-
 // Updates the numbers listed on the html element in the UI
 var updateCoordinates = function ({ target }, ui) {
-    var x = adjustCooridinate(target.offsetLeft, "x",  true);
+    var x = adjustCooridinate(target.offsetLeft, "x", true);
     var y = adjustCooridinate(target.offsetTop, "y", true);
-    target.innerHTML = "(" + x + ", " + y + ")";
-    shopObject.objects.forEach(function(object) {
+    shopObject.objects.forEach(function (object) {
         if (object.name == target.id) {
+            target.innerHTML = objectTypes[object.type].name + "\n" + "(" + x + ", " + y + ")";
             object.x = x;
             object.y = y;
         }
@@ -73,26 +91,22 @@ var updateCoordinates = function ({ target }, ui) {
 var downloadCSV = function () {
 
     // fills out the top two rows with labels and the window specs
-    let rows = [["name", "x", "y", "width", "height", "color"], ["window", "0", "0", shopLayoutEl.style.width.split("px")[0], shopLayoutEl.style.height.split("px")[0], "000000"]]
+    let rows = [["Name", "Obj Type", "Succ", "x", "y"]]
 
-    var children = shopLayoutEl.children;
+    var objects = shopObject.objects;
 
     // Converts the HTML list into an array that we can iterate through to create a nested array containing all screen info
-    Array.from(children).forEach(function (child) {
+    objects.forEach(function (object) {
         let row = []
-        row.push(child.id)
-        row.push(adjustCooridinate(child.offsetLeft, "x"))
-        row.push(adjustCooridinate(child.offsetTop, "y"))
-        row.push(child.style.width.split("px")[0])
-        row.push(child.style.height.split("px")[0])
-
-        // controlls the color and changes the rgb value to hex
-        var colors = child.style.background.split("(")[1].split(")")[0].split(", ")
-        var hex = rgbToHex(parseInt(colors[0]), parseInt(colors[1]), parseInt(colors[2]))
-        row.push(hex);
+        row.push(object.name)
+        row.push(objectTypes[object.type].name)
+        row.push(" ")
+        row.push(object.x)
+        row.push(object.y)
         rows.push(row);
     })
 
+    console.log(rows);
     // csv header
     let csvContent = "data:text/csv;charset=utf-8,";
 
@@ -127,37 +141,35 @@ var uploadCSV = function (file) {
             rows.pop();
 
             // Quick and dirty window size adjustment
-            widthInputEl.value = parseInt(rows[1].split(",")[3])
-            heightInputEl.value = parseInt(rows[1].split(",")[4])
-            handleSave();
+            // widthInputEl.value = parseInt(rows[1].split(",")[3])
+            // heightInputEl.value = parseInt(rows[1].split(",")[4])
+            // handleSave();
 
             // Iterates through the rows skipping the header and window info
             rows.forEach(function (row, index) {
-                if (index > 1) {
+                if (index > 0) {
 
                     // Temperary object to store the properties of each element on the screen
                     let obj = {}
                     let rowArray = row.split(",");
-                    for (var i = 1; i <= 5; i++) {
+                    for (var i = 0; i <= 5; i++) {
 
                         // Skipping the name we sort each property
                         switch (i) {
-                            case 1: obj.x = parseInt(rowArray[i]);
+                            case 0: obj.name = rowArray[i];
                                 break;
-                            case 2: obj.y = parseInt(rowArray[i]);
+                            case 1: obj.type = rowArray[i];
                                 break;
-                            case 3: obj.width = parseInt(rowArray[i]);
+                            case 3: obj.x = parseInt(rowArray[i]);
                                 break;
-                            case 4: obj.height = parseInt(rowArray[i]);
-                                break;
-                            case 5: obj.color = "#" + rowArray[i];
+                            case 4: obj.y = parseInt(rowArray[i]);
                                 break;
                             default:
                         }
                     }
 
                     // We add the object to the list of a new items then repeat
-                    result.push(obj);
+                    shopObject.objects.push(obj);
                 }
             })
 
@@ -165,6 +177,7 @@ var uploadCSV = function (file) {
             result.forEach(function (params) {
                 createObject(params)
             })
+            updateShopSize();
         };
 
         // Error handling
@@ -209,13 +222,14 @@ var closeCSVModal = function () {
 // Sets all the properties of a new object with params as an input
 var createObject = function (params) {
     var shopObjectEl = document.createElement("div");
+    var objectType = objectTypes[params.type]
     shopObjectEl.className = "shop-element";
     shopObjectEl.id = params.name
     shopObjectEl.style.left = adjustCooridinate(params.x, "x") + "px";
     shopObjectEl.style.top = adjustCooridinate(params.y, "y") + "px";
-    shopObjectEl.style.height = params.height * scale + "px";
-    shopObjectEl.style.width = params.width * scale + "px";
-    shopObjectEl.style.background = params.color
+    shopObjectEl.style.height = objectType.length * 10 * scale + "px";
+    shopObjectEl.style.width = objectType.width * 10 * scale + "px";
+    shopObjectEl.style.background = objectType.color;
     shopLayoutEl.appendChild(shopObjectEl);
 
     // Get the coordinates on the face of the object for the first time
@@ -223,12 +237,13 @@ var createObject = function (params) {
 
     // Sets the object as a draggable in jQuery
     //cursor: "crosshair", cursorAt: { top: 0, left: 0 },
-    $("#" + params.name).draggable({ containment: "parent", snap: true, grid: [ scale, scale ], drag: updateCoordinates, stop: updateCoordinates });
+    $("#" + params.name).draggable({ containment: "parent", snap: true, grid: [scale, scale], drag: updateCoordinates, stop: updateCoordinates });
 }
 
 // Handles the button press to add a new object
 var handleCreateObject = function () {
-    shopObject.objects.push({ name: "shop-element" + objectIndex, x: 0, y: 0, width: objectWidthInputEl.value, height: objectHeightInputEl.value, color: objectColorInputEl.value })
+    console.log(objectTypeSelectEl.value);
+    shopObject.objects.push({ name: "shop-element" + objectIndex, type_id: objectTypeSelectEl.value, x: 0, y: 0 })
     var params = shopObject.objects[shopObject.objects.length - 1];
     console.log(shopObject.objects);
     createObject(params);
@@ -245,7 +260,7 @@ var updateShopSize = function () {
     while (shopLayoutEl.firstChild) {
         shopLayoutEl.removeChild(shopLayoutEl.firstChild);
     }
-    shopObject.objects.forEach(function(object) {
+    shopObject.objects.forEach(function (object) {
         createObject(object);
     });
 }
@@ -257,8 +272,18 @@ var handleSave = function (event) {
     updateShopSize();
 }
 
+var updateOptions = function () {
+    for(const property in objectTypes) {
+        var optionEl = document.createElement("option");
+        optionEl.value = property.name;
+        optionEl.innerHTML = property.name;
+        objectTypeSelectEl.appendChild(optionEl);
+    }
+}
+
 // Set the shiop size using default values
 handleSave();
+updateOptions();
 
 // Listeners for all button presses
 saveBtn.addEventListener('click', handleSave);
