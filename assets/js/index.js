@@ -1,10 +1,6 @@
 // Layout Element
 var shopLayoutEl = document.querySelector("#shop-layout-ui");
 
-//
-var windowHeight = window.innerHeight;
-var windowWidth = window.innerWidth;
-
 //Btns
 var saveBtn = document.querySelector("#save");
 var addBtn = document.querySelector("#add-element")
@@ -29,26 +25,27 @@ var csvModalEl = document.querySelector("#upload-csv-modal");
 
 // Global Variables
 var objectIndex = 1;
-var shopDim = {};
+var scale;
 var shopObject = {
-    window: {width: "", height: ""},
+    walls: { width: widthInputEl.value, height: heightInputEl.value },
     objects: []
 }
 
-// Function to translate absolute screen positiion to relative shop position
-// reverse is a boolean that converts relative values back to absolute
 var adjustCooridinate = function (value, axis, reverse) {
-    if (!reverse) {
+    var scaledValue;
+    if (reverse) {
         if (axis == "x") {
-            return value - parseInt(shopLayoutEl.offsetLeft) - 3
+            scaledValue = value - parseInt(shopLayoutEl.offsetLeft)
         } else if (axis == "y") {
-            return value - parseInt(shopLayoutEl.offsetTop) - 3
+            scaledValue = value - parseInt(shopLayoutEl.offsetTop)
         }
+        return Math.round(scaledValue/10/scale);
     } else {
+        scaledValue = value * 10 * scale
         if (axis == "x") {
-            return value + parseInt(shopLayoutEl.offsetLeft) + 3
+            return scaledValue + parseInt(shopLayoutEl.offsetLeft)
         } else if (axis == "y") {
-            return value + parseInt(shopLayoutEl.offsetTop) + 3
+            return scaledValue + parseInt(shopLayoutEl.offsetTop)
         }
     }
 }
@@ -61,7 +58,15 @@ var rgbToHex = (r, g, b) => [r, g, b].map(x => {
 
 // Updates the numbers listed on the html element in the UI
 var updateCoordinates = function ({ target }, ui) {
-    target.innerHTML = "(" + adjustCooridinate(target.offsetLeft, "x") + ", " + adjustCooridinate(target.offsetTop, "y") + ")";
+    var x = adjustCooridinate(target.offsetLeft, "x",  true);
+    var y = adjustCooridinate(target.offsetTop, "y", true);
+    target.innerHTML = "(" + x + ", " + y + ")";
+    shopObject.objects.forEach(function(object) {
+        if (object.name == target.id) {
+            object.x = x;
+            object.y = y;
+        }
+    })
 }
 
 // Exports the current settings to a CSV file
@@ -155,7 +160,7 @@ var uploadCSV = function (file) {
                     result.push(obj);
                 }
             })
-            
+
             // Each object is then sent to the object contructer to add them to the screen
             result.forEach(function (params) {
                 createObject(params)
@@ -205,11 +210,11 @@ var closeCSVModal = function () {
 var createObject = function (params) {
     var shopObjectEl = document.createElement("div");
     shopObjectEl.className = "shop-element";
-    shopObjectEl.id = "shop-element" + objectIndex;
-    shopObjectEl.style.left = adjustCooridinate(params.x, "x", true) + "px";
-    shopObjectEl.style.top = adjustCooridinate(params.y, "y", true) + "px";
-    shopObjectEl.style.height = params.height + "px";
-    shopObjectEl.style.width = params.width + "px";
+    shopObjectEl.id = params.name
+    shopObjectEl.style.left = adjustCooridinate(params.x, "x") + "px";
+    shopObjectEl.style.top = adjustCooridinate(params.y, "y") + "px";
+    shopObjectEl.style.height = params.height * scale + "px";
+    shopObjectEl.style.width = params.width * scale + "px";
     shopObjectEl.style.background = params.color
     shopLayoutEl.appendChild(shopObjectEl);
 
@@ -217,37 +222,40 @@ var createObject = function (params) {
     updateCoordinates({ target: shopObjectEl }, {})
 
     // Sets the object as a draggable in jQuery
-    $("#shop-element" + objectIndex).draggable({ containment: "parent", snap: true, cursor: "crosshair", cursorAt: { top: 0, left: 0 }, drag: updateCoordinates, stop: updateCoordinates });
-
-    // Clean up
-    objectIndex += 1;
-    closeObjectModal();
+    //cursor: "crosshair", cursorAt: { top: 0, left: 0 },
+    $("#" + params.name).draggable({ containment: "parent", snap: true, grid: [ scale, scale ], drag: updateCoordinates, stop: updateCoordinates });
 }
 
 // Handles the button press to add a new object
 var handleCreateObject = function () {
-    var params = { x: 0, y: 0, width: objectWidthInputEl.value, height: objectHeightInputEl.value, color: objectColorInputEl.value }
+    shopObject.objects.push({ name: "shop-element" + objectIndex, x: 0, y: 0, width: objectWidthInputEl.value, height: objectHeightInputEl.value, color: objectColorInputEl.value })
+    var params = shopObject.objects[shopObject.objects.length - 1];
+    console.log(shopObject.objects);
     createObject(params);
+    objectIndex += 1;
+    closeObjectModal();
+}
+
+var updateShopSize = function () {
+    var xScale = Math.floor(window.innerWidth / (shopObject.walls.width * 10));
+    var yScale = Math.floor(window.innerHeight / (shopObject.walls.height * 10));
+    if (xScale <= yScale) { scale = xScale } else { scale = yScale };
+    shopLayoutEl.style.width = shopObject.walls.width * 10 * scale + "px";
+    shopLayoutEl.style.height = shopObject.walls.height * 10 * scale + "px";
+    while (shopLayoutEl.firstChild) {
+        shopLayoutEl.removeChild(shopLayoutEl.firstChild);
+    }
+    shopObject.objects.forEach(function(object) {
+        createObject(object);
+    });
 }
 
 // Handle saveing shop size 
-// This is very quick and dirty however in the future this info with come from plant sim
 var handleSave = function (event) {
-    shopDim.width = widthInputEl.value + "px"
-    shopDim.height = heightInputEl.value + "px"
-    shopLayoutEl.style.width = shopDim.width;
-    shopLayoutEl.style.height = shopDim.height;
+    shopObject.walls.width = widthInputEl.value
+    shopObject.walls.height = heightInputEl.value
+    updateShopSize();
 }
-
-var getWindowDimensions = function () {
-    windowHeight = window.innerHeight;
-    windowWidth = window.innerWidth;
-}
-
-var drawLayout = function () {
-    
-}
-
 
 // Set the shiop size using default values
 handleSave();
@@ -261,4 +269,4 @@ createObjectCancelBtn.addEventListener('click', closeObjectModal);
 csvUploadBtn.addEventListener('click', openCSVModal);
 uploadCSVConfirmBtn.addEventListener('click', handleUploadCSV);
 uploadCSVCancelBtn.addEventListener('click', closeCSVModal);
-window.addEventListener('resize', getWindowDimensions);
+window.addEventListener('resize', updateShopSize);

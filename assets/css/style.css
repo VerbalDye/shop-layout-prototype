@@ -13,8 +13,13 @@ input {
     color: black;
 }
 
-#shop-layout-ui {
+main {
     border: 3px #08262C solid;
+    width: fit-content;
+    height: fit-content;
+}
+
+#shop-layout-ui {
     background-color: #E8B00F;
 }
 
