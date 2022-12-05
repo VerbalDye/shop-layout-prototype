@@ -80,7 +80,7 @@ var updateCoordinates = function ({ target }, ui) {
     var y = adjustCooridinate(target.offsetTop, "y", true);
     shopObject.objects.forEach(function (object) {
         if (object.name == target.id) {
-            target.innerHTML = objectTypes[object.type].name + "\n" + "(" + x + ", " + y + ")";
+            target.innerHTML = object.type + "<br/>" + "(" + x + ", " + y + ")";
             object.x = x;
             object.y = y;
         }
@@ -152,7 +152,7 @@ var uploadCSV = function (file) {
                     // Temperary object to store the properties of each element on the screen
                     let obj = {}
                     let rowArray = row.split(",");
-                    for (var i = 0; i <= 5; i++) {
+                    for (var i = 0; i < 5; i++) {
 
                         // Skipping the name we sort each property
                         switch (i) {
@@ -160,9 +160,9 @@ var uploadCSV = function (file) {
                                 break;
                             case 1: obj.type = rowArray[i];
                                 break;
-                            case 3: obj.x = parseInt(rowArray[i]);
+                            case 3: obj.x = Math.round(parseFloat(rowArray[i]) * 10) / 10;
                                 break;
-                            case 4: obj.y = parseInt(rowArray[i]);
+                            case 4: obj.y = Math.round(parseFloat(rowArray[i]) * 10) / 10;
                                 break;
                             default:
                         }
@@ -223,6 +223,7 @@ var closeCSVModal = function () {
 var createObject = function (params) {
     var shopObjectEl = document.createElement("div");
     var objectType = objectTypes[params.type]
+    console.log(objectType)
     shopObjectEl.className = "shop-element";
     shopObjectEl.id = params.name
     shopObjectEl.style.left = adjustCooridinate(params.x, "x") + "px";
@@ -243,7 +244,7 @@ var createObject = function (params) {
 // Handles the button press to add a new object
 var handleCreateObject = function () {
     console.log(objectTypeSelectEl.value);
-    shopObject.objects.push({ name: "shop-element" + objectIndex, type_id: objectTypeSelectEl.value, x: 0, y: 0 })
+    shopObject.objects.push({ name: "shop-element" + objectIndex, type: objectTypeSelectEl.value, x: 0, y: 0 })
     var params = shopObject.objects[shopObject.objects.length - 1];
     console.log(shopObject.objects);
     createObject(params);
@@ -273,10 +274,10 @@ var handleSave = function (event) {
 }
 
 var updateOptions = function () {
-    for(const property in objectTypes) {
+    for(var type in objectTypes) {
         var optionEl = document.createElement("option");
-        optionEl.value = property.name;
-        optionEl.innerHTML = property.name;
+        optionEl.value = type;
+        optionEl.innerHTML = type;
         objectTypeSelectEl.appendChild(optionEl);
     }
 }
@@ -294,4 +295,4 @@ createObjectCancelBtn.addEventListener('click', closeObjectModal);
 csvUploadBtn.addEventListener('click', openCSVModal);
 uploadCSVConfirmBtn.addEventListener('click', handleUploadCSV);
 uploadCSVCancelBtn.addEventListener('click', closeCSVModal);
-window.addEventListener('resize', updateShopSize);
+window.addEventListener('resize', updateShopSize);  
