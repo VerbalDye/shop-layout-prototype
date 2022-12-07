@@ -148,7 +148,6 @@ var uploadCSV = function (file) {
             // Iterates through the rows skipping the header and window info
             rows.forEach(function (row, index) {
                 if (index > 0) {
-
                     // Temperary object to store the properties of each element on the screen
                     let obj = {}
                     let rowArray = row.split(",");
@@ -157,6 +156,9 @@ var uploadCSV = function (file) {
                         // Skipping the name we sort each property
                         switch (i) {
                             case 0: obj.name = rowArray[i];
+                            if (parseInt(obj.name.split("element")[1]) >= objectIndex) {
+                                objectIndex = parseInt(obj.name.split("element")[1]) + 1;
+                            }
                                 break;
                             case 1: obj.type = rowArray[i];
                                 break;
@@ -224,7 +226,7 @@ var closeCSVModal = function () {
 var createObject = function (params) {
     var shopObjectEl = document.createElement("div");
     var objectType = objectTypes[params.type]
-    console.log(objectType)
+    console.log(objectIndex)
     shopObjectEl.className = "shop-element";
     shopObjectEl.id = params.name
     shopObjectEl.style.left = adjustCooridinate(params.x, "x") + "px";
