@@ -99,7 +99,7 @@ var downloadCSV = function () {
     objects.forEach(function (object) {
         let row = []
         row.push(object.name)
-        row.push(objectTypes[object.type].name)
+        row.push(object.type)
         row.push(" ")
         row.push(object.x)
         row.push(object.y)
@@ -177,6 +177,7 @@ var uploadCSV = function (file) {
             result.forEach(function (params) {
                 createObject(params)
             })
+            console.log(shopObject.objects);
             updateShopSize();
         };
 
